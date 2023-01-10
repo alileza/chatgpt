@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os"
 
@@ -45,25 +45,17 @@ func main() {
 		Use:   "chatgpt",
 		Short: "Chat with ChatGPT in console.",
 		Run: func(cmd *cobra.Command, args []string) {
-			scanner := bufio.NewScanner(os.Stdin)
-			quit := false
-
-			for !quit {
-				fmt.Print("輸入你的問題(quit 離開): ")
-
-				if !scanner.Scan() {
-					break
+			var question string
+			if len(args) == 0 {
+				b, err := io.ReadAll(os.Stdin)
+				if err != nil {
+					log.Fatal(err)
 				}
-
-				question := scanner.Text()
-				switch question {
-				case "quit":
-					quit = true
-
-				default:
-					GetResponse(client, ctx, question)
-				}
+				question = string(b)
+			} else {
+				question = args[0]
 			}
+			GetResponse(client, ctx, question)
 		},
 	}
 
